@@ -1,6 +1,7 @@
 import sys
 import os
 from math import pi
+import yaml
 
 class Circle():
     def __init__(self, radius, fill='red',stroke='black'):
@@ -27,11 +28,31 @@ class Circle():
     def __len__(self):
         return int(2 * pi * self._radius ** 2)
 
-    def __str__(self):
-        return f'Instance of {self.__class__.__qualname__}'
+    # def __str__(self):
+    #     return f'Instance of {self.__class__.__qualname__}'
 
     def __repr__(self):
         return f'Circle({self.radius}, fill={self.fill}, stroke={self.stroke})'
+
+    def __str__(self):
+        string = yaml.dump({
+            'circle':{
+                'radius':self._radius,
+                'fill':self._fill,
+                'stroke':self._stroke
+            }
+        })
+        return string
+       # return f'Instance of {self.__class__.__qualname__}'
+
+    # Deserialization: Class (static) methods
+    @classmethod
+    def from_yaml(cls,string):
+        """Create a circle from a YAML string"""
+        circle_dict = yaml.load(string, Loader=yaml.Loader)
+        #print(circle_dict)
+        obj = cls(circle_dict['radius'],fill=circle_dict['fill'],stroke=circle_dict['stroke'],at=circle_dict['at']) #cls stands in for name of class
+        return obj
 
 class Quadrilateral():
     def __init__(self, height, width, fill='pink',stroke='black'):
@@ -56,6 +77,9 @@ class Text():
         self._colour = colour
         self._font = font
 
+
+
+
 def main():
     circle = Circle(5.0, fill='orange', stroke='black')
     print(str(circle)) #Example of Dunder methods
@@ -66,6 +90,25 @@ def main():
     #circle.radius = 5 #won't work (can't overwrite private variable since property was set)
     circle._radius = 5
     print(f'area = {circle.calculate_area}')
+
+    my_dict = {
+        'key':{
+            'inside_dict':[5,6,7,8]
+        }
+    }
+
+    print(yaml.dump(my_dict))
+
+    yaml_circle = '''\
+circle:
+    at: !!python/tuple
+    - 0
+    - 0
+    fill: orange
+    radius: 5.0
+    stroke: red'''
+    my_circle = Circle.from_yaml(yaml_circle)
+
     return 0
     #return os.EX_OK
 
